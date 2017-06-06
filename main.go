@@ -5,6 +5,7 @@ import (
 	"github.com/cod3hulk/alfred"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 var items []alfred.Item
@@ -21,7 +22,7 @@ func visit(path string, f os.FileInfo, err error) error {
 	// search for idea config files
 	if extension == ".iml" {
 		item := alfred.Item{
-			Title:    f.Name(),
+			Title:    strings.TrimSuffix(f.Name(), filepath.Ext(f.Name())),
 			Subtitle: path,
 			Arg:      path,
 		}
