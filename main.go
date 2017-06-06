@@ -2,9 +2,12 @@ package main
 
 import (
 	"fmt"
+	"github.com/cod3hulk/alfred"
 	"os"
 	"path/filepath"
 )
+
+var items []alfred.Item
 
 func visit(path string, f os.FileInfo, err error) error {
 	extension := filepath.Ext(f.Name())
@@ -17,7 +20,12 @@ func visit(path string, f os.FileInfo, err error) error {
 
 	// search for idea config files
 	if extension == ".iml" {
-		fmt.Printf("Visited: %s\n", f.Name())
+		item := alfred.Item{
+			Title:    f.Name(),
+			Subtitle: path,
+			Arg:      path,
+		}
+		items = append(items, item)
 		return filepath.SkipDir
 	}
 
@@ -26,6 +34,9 @@ func visit(path string, f os.FileInfo, err error) error {
 
 func main() {
 	root := "/Users/tave/development"
-	err := filepath.Walk(root, visit)
-	fmt.Printf("filepath.Walk() returned %v\n", err)
+	filepath.Walk(root, visit)
+
+	result := new(alfred.Result)
+	result.AddAll(items)
+	fmt.Printf(result.Output())
 }
