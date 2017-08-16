@@ -14,9 +14,8 @@ var items []alfred.Item
 func visit(path string, f os.FileInfo, err error) error {
 	extension := filepath.Ext(f.Name())
 
-	// ignore git config directories
-	if f.IsDir() && extension == ".git" && extension != ".idea" {
-		//fmt.Printf("Skipping .git dir")
+	// ignore config directories
+	if f.IsDir() && strings.HasPrefix(extension, ".") {
 		return filepath.SkipDir
 	}
 
@@ -41,7 +40,7 @@ func filterItem(item alfred.Item, query string) bool {
 }
 
 func main() {
-	root := "/Users/tave/development"
+	root := "/Volumes/development"
 	filepath.Walk(root, visit)
 
 	result := new(alfred.Result)
