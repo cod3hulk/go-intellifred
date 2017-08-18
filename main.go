@@ -11,16 +11,32 @@ import (
 
 var items []alfred.Item
 
-func visit(path string, f os.FileInfo, err error) error {
-	extension := filepath.Ext(f.Name())
+var dirsToSkip = [...]string{"target",
+	".git",
+	".idea",
+	"src",
+	"bin", "lib",
+	".mvn",
+	".settings",
+}
 
-	// ignore config directories
-	if f.IsDir() && strings.HasPrefix(extension, ".") {
+func skip(filename string) bool {
+	for i := range dirsToSkip {
+		if dirsToSkip[i] == filename {
+			return true
+		}
+	}
+	return false
+}
+
+func visit(path string, f os.FileInfo, err error) error {
+
+	if f.IsDir() && skip(f.Name()) {
 		return filepath.SkipDir
 	}
 
 	// search for idea config files
-	if extension == ".iml" {
+	if !f.IsDir() && filepath.Ext(f.Name()) == ".iml" {
 		item := alfred.Item{
 			Title:    strings.TrimSuffix(f.Name(), filepath.Ext(f.Name())),
 			Subtitle: path,
