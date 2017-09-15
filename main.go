@@ -6,6 +6,7 @@ import (
 	"github.com/renstrom/fuzzysearch/fuzzy"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 )
 
@@ -29,9 +30,17 @@ func skip(filename string) bool {
 	return false
 }
 
+func depth(path string) int {
+	return len(strings.Split(path, "/"))
+}
+
 func visit(path string, f os.FileInfo, err error) error {
 
 	if f.IsDir() && skip(f.Name()) {
+		return filepath.SkipDir
+	}
+
+	if f.IsDir() && depth(path) > Max_depth {
 		return filepath.SkipDir
 	}
 
@@ -55,11 +64,19 @@ func filterItem(item alfred.Item, query string) bool {
 	return fuzzy.Match(query, arg)
 }
 
+var args = os.Args[1:]
+var Root = args[0]
+var Filename = args[1]
+var Max_depth, err = strconv.Atoi(args[2])
+
 func main() {
-	root := "/Volumes/development"
-	filepath.Walk(root, visit)
+	if err != nil {
+		Max_depth = 5
+	}
+
+	filepath.Walk(Root, visit)
 
 	result := new(alfred.Result)
 	result.AddAll(items)
-	fmt.Print(result.Filter(os.Args[1], filterItem).Output())
+	fmt.Print(result.Filter(Filename, filterItem).Output())
 }
