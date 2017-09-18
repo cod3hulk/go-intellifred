@@ -69,7 +69,7 @@ var project string
 var max_depth int
 
 func main() {
-	flag.IntVar(&max_depth, "max_depth", 5, "Max directory depth to search for")
+	flag.IntVar(&max_depth, "max-depth", 5, "Max directory depth to search for")
 	flag.StringVar(&project, "project", "", "Project name to search for")
 	flag.StringVar(&root, "root", "", "Directory where the projects are placed")
 	flag.Parse()
