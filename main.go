@@ -1,12 +1,12 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"github.com/cod3hulk/alfred"
 	"github.com/renstrom/fuzzysearch/fuzzy"
 	"os"
 	"path/filepath"
-	"strconv"
 	"strings"
 )
 
@@ -40,7 +40,7 @@ func visit(path string, f os.FileInfo, err error) error {
 		return filepath.SkipDir
 	}
 
-	if f.IsDir() && depth(path) > Max_depth {
+	if f.IsDir() && depth(path) > max_depth {
 		return filepath.SkipDir
 	}
 
@@ -64,19 +64,29 @@ func filterItem(item alfred.Item, query string) bool {
 	return fuzzy.Match(query, arg)
 }
 
-var args = os.Args[1:]
-var Root = args[0]
-var Filename = args[1]
-var Max_depth, err = strconv.Atoi(args[2])
+var root string
+var project string
+var max_depth int
 
 func main() {
-	if err != nil {
-		Max_depth = 5
+	flag.IntVar(&max_depth, "max_depth", 5, "Max directory depth to search for")
+	flag.StringVar(&project, "project", "", "Project name to search for")
+	flag.StringVar(&root, "root", "", "Directory where the projects are placed")
+	flag.Parse()
+
+	if project == "" {
+		fmt.Println("Project ist mandatory")
+		return
 	}
 
-	filepath.Walk(Root, visit)
+	if root == "" {
+		fmt.Println("Root ist mandatory")
+		return
+	}
+
+	filepath.Walk(root, visit)
 
 	result := new(alfred.Result)
 	result.AddAll(items)
-	fmt.Print(result.Filter(Filename, filterItem).Output())
+	fmt.Print(result.Filter(project, filterItem).Output())
 }
